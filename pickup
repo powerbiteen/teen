@@ -1,0 +1,50 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Aug  2 12:14:25 2023
+
+@author: chairman
+"""
+
+import requests
+import json
+
+
+
+
+def refreshtable(tables):
+    headers={
+     "Content-Type": "application/x-www-form-urlencoded"
+    }
+    apiurl= 'https://login.microsoftonline.com/705a85ad--493a-a54c-/oauth2/v2.0/token'
+    datas={'client_id':'6ecd3c34-b812-4bd1--59e03f1d4b3c',
+
+           'scope':"https://windows.net/powerbi/api/.default"
+           
+           }
+    response = requests.post(apiurl, headers=headers,data=datas)
+    response_text=json.loads(response.text)
+    access_token=response_text['access_token']
+    #print(response_text)
+    
+    headers2={
+        "Authorization": "Bearer "+access_token,
+        "Content-type": "application/json"
+    }
+    refresh_url='https://api.powerbi.com/v1.0/myorg/groups/2f6689cf-669d--88d6-/datasets/-5abf-4d58-ac54-6bd1fc9c953e/refreshes'
+    
+    tableobjects = [{"table": item} for item in tables]
+    body={
+        "type": "Full",
+        "commitMode": "transactional",
+        "maxParallelism": 2,
+        "retryCount": 2,
+        "objects": tableobjects
+    }
+    response = requests.post(refresh_url, headers=headers2, data=json.dumps(body))
+    response_code=response.status_code
+    return response_code
+
+
+
+if __name__ == '__main__':
+    refreshtable(["预排课表","预排课表-春排课表-显示类别","刷新时间课表"])

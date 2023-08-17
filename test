@@ -1,0 +1,56 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Aug  2 11:40:29 2023
+
+@author: chairman
+"""
+
+from 课表整理 import class_time_table
+from 维新班课录入2022C import assemble_all_classcost
+from powerbi国际版api刷新 import refreshtable
+
+import os
+import time
+
+
+# 获取2个文件路径
+file_path1 = r'D:\OneDrive - weixinedu\2021年秋季课表预排.xlsx'
+last_modified1 = os.path.getmtime(file_path1)
+
+xueqi='2022S'
+file_path2=r"D:\OneDrive - weixinedu\维新教育\考勤表"+"\\"+xueqi+"班课考勤表.xlsx"
+last_modified2 = os.path.getmtime(file_path2)
+
+
+while True:
+    try:
+        current_modified1 = os.path.getmtime(file_path1)
+        current_modified2 = os.path.getmtime(file_path2)
+        if current_modified1 !=last_modified1:
+            print("课表发生更改")
+            class_time_table()
+            response_code=refreshtable(["预排课表","预排课表-春秋季时间","预排课表-寒暑假时间","预排课表-课表日期","预排课表-显示类别","刷新时间课表"])
+            if response_code==202:
+                pass
+            else:
+                time.sleep(30)
+                response_code=refreshtable(["预排课表","预排课表-春秋季时间","预排课表-寒暑假时间","预排课表-课表日期","预排课表-显示类别","刷新时间课表"])
+            last_modified1=current_modified1
+        elif current_modified2 !=last_modified2:
+            print("课耗发生更改")
+            assemble_all_classcost()
+            response_code=refreshtable(["课耗明细"])
+            if response_code==202:
+                pass
+            else:
+                time.sleep(30)
+                response_code=refreshtable(["课耗明细"])
+            last_modified2=current_modified2
+        else:
+            current_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+            print(current_time)
+        time.sleep(10)
+    except:
+        pass
+        time.sleep(10)
+
